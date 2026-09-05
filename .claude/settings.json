@@ -1,0 +1,44 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "deny": [
+      "mcp__Me__place_equity_order",
+      "mcp__Me__place_option_order",
+      "mcp__Me__place_crypto_order",
+      "mcp__Me__cancel_equity_order",
+      "mcp__Me__cancel_option_order",
+      "mcp__Me__cancel_crypto_order",
+      "mcp__Me__cancel_option_exercise",
+      "mcp__Me__exercise_option",
+      "mcp__Me__review_equity_order",
+      "mcp__Me__review_option_order",
+      "mcp__Me__preview_crypto_order",
+      "mcp__Me__create_watchlist",
+      "mcp__Me__update_watchlist",
+      "mcp__Me__add_to_watchlist",
+      "mcp__Me__remove_from_watchlist",
+      "mcp__Me__add_option_to_watchlist",
+      "mcp__Me__remove_option_from_watchlist",
+      "mcp__Me__follow_watchlist",
+      "mcp__Me__unfollow_watchlist",
+      "mcp__Me__create_scan",
+      "mcp__Me__update_scan_filters",
+      "mcp__Me__update_scan_config"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__Me__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block-mutating.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
