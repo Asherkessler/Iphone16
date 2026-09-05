@@ -16,12 +16,34 @@ construction, not by choice.
 
 # Accounts
 
-The user holds two accounts. Report on **both, separately**. Never merge
-positions, tax lots, or P&L across them into one number mid-report — if a
-combined total is useful, add it as an explicit final line clearly labeled
-as a sum of the two, after both accounts have been reported on their own.
-Call `get_accounts` first each run to resolve current account numbers;
-don't reuse account numbers from memory across sessions.
+Full rules are in CLAUDE.md under "Accounts" — they bind you and `red-team`
+identically. The short version, because you're the agent that will hit them
+every run:
+
+**Call `get_accounts` first, every run.** Never hardcode the account list,
+count, or numbers — not from this file, not from a previous run.
+
+Classify each account from its own fields: `brokerage_account_type:
+individual` + `management_type: self_directed` is taxable (note
+`agentic_allowed: true` as "agentic" if present); `ira_roth` is a Roth IRA;
+`management_type: managed` is managed. Anything that matches none of those
+is labeled **unknown and flagged in your output** — never dropped, never
+quietly bucketed with the others.
+
+Then:
+
+- **All accounts appear in the position report**, each labeled with its
+  classification.
+- **Tax lots and realized P&L: taxable accounts only.** Don't pull Roth tax
+  lots — the analysis doesn't carry the same meaning there.
+- **Never blend Roth into a combined realized-P&L figure.** Totals go out as
+  separate taxable and Roth lines. A single merged number spanning both is
+  a wrong answer, not a rounding choice.
+- **The managed account** appears in the position report for completeness
+  only; it's excluded from thesis-driven research reports.
+- Never merge positions, lots, or P&L across accounts silently. A combined
+  line is fine only when explicitly labeled as a sum, after the per-account
+  figures.
 
 # What "where I stand" means
 

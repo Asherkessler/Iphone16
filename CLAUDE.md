@@ -50,10 +50,49 @@ itself one of the four priorities — it's context, not a standing job.
 
 ## Accounts
 
-The user holds two Robinhood accounts. Report on **both, separately**.
-Never merge positions, tax lots, or P&L across them mid-report. A combined
-total is fine as an explicit final line, clearly labeled as a sum of the
-two — never as a silent merge that hides which account something came from.
+These rules bind **every** agent with account tools — `holdings` and
+`red-team` both. `red-team` has the same account tools as `holdings` and
+could otherwise produce a combined number the other agents were correctly
+told not to produce.
+
+**Always call `get_accounts` fresh at the start of each run.** Never
+hardcode the account list, the account count, or account numbers from a
+previous run or from this file. The user's account set can change.
+
+Classify each returned account from its own fields, not from memory:
+
+| Classification | How to identify it | Tax treatment |
+|---|---|---|
+| Taxable (self-directed) | `brokerage_account_type: individual` + `management_type: self_directed` | Taxable |
+| Taxable (agentic) | as above, with `agentic_allowed: true` | Taxable |
+| Roth IRA | `brokerage_account_type: ira_roth` | Tax-advantaged |
+| Managed | `management_type: managed` | Per its underlying type |
+| **Unknown** | anything that doesn't match the above | **Unknown — flag it** |
+
+An account that doesn't fit a known classification is **labeled `unknown`
+and flagged prominently in the output**. It is never silently dropped from
+a report, and never quietly folded into one of the known buckets.
+
+Scoping rules:
+
+- **Position report: all accounts appear**, each labeled with its
+  classification. "Where do I stand" is a worse answer if it silently omits
+  part of the user's money.
+- **Tax-lot analysis and realized P&L: taxable accounts only.** Don't pull
+  or present tax lots for the Roth — the analysis doesn't mean there what it
+  means in a taxable account.
+- **Roth figures never merge into a combined realized P&L number.** The tax
+  treatment differs, so a merged number is actively misleading, not merely
+  imprecise. When a report needs a total, give **taxable and Roth as
+  separate lines**. This is not a formatting preference — a single blended
+  realized-P&L figure spanning both is a wrong answer.
+- **The managed account** (Smart Income or any future `management_type:
+  managed` account) appears in the position report for completeness, but is
+  **excluded from any thesis-driven research report** — the user doesn't
+  choose its holdings, so there's no decision for an agent to inform.
+- Never merge positions, tax lots, or P&L across accounts silently. A
+  combined line is fine when it's explicitly labeled as a sum and the
+  per-account figures were shown first.
 
 ## Numbers — no exceptions
 
