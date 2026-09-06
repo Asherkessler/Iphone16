@@ -42,6 +42,50 @@ Filing pairs were correctly identified and are ready for a retry:
 | INTC | 10-Q filed 2026-07-23 (Q2 FY2026, period 2026-06-27) | 10-Q filed 2025-07-24 |
 | IREN | 10-K filed 2026-08-27 (FY2026) | 10-K filed 2025-08-28 |
 
+PBR is **not** in the retry set — it has no 20-F on file at all (§1.5), so
+there is nothing to diff even once the endpoint recovers. MMED is not either
+— zero filings of any type (§1.4).
+
+### RETRY RECIPE — for when `get_sec_filing` is back
+
+**Step 1 — liveness check.** One call. If this still 404s, the endpoint is
+still down; stop here and don't spend a run on it.
+
+```
+get_sec_filing(filing_id="608159a9-fa5b-49b2-a541-87e1ea748114")
+```
+
+(No `section` argument returns the table of contents. That is the cheapest
+possible probe — if the TOC comes back, section reads should work.)
+
+**Step 2 — if live, the six filings to diff.** Fetch the TOC for each, then
+pull only the MD&A and risk-factor section ids from it. The cap stands:
+those two sections, not whole documents.
+
+| Ticker | Role | filing_id |
+|---|---|---|
+| CRDO | current (10-Q, 2026-09-02) | `608159a9-fa5b-49b2-a541-87e1ea748114` |
+| CRDO | prior (10-Q, 2025-09-04) | `0dd5952e-0bd9-4882-9e8c-7054f7850471` |
+| INTC | current (10-Q, 2026-07-23) | `7d284287-53d3-459d-9771-32553b9346ba` |
+| INTC | prior (10-Q, 2025-07-24) | `ec6c64ee-8681-4e1d-9b06-3c944e87b7f9` |
+| IREN | current (10-K, 2026-08-27) | `f13cc08c-88d1-4826-8b3c-de24935d3f8e` |
+| IREN | prior (10-K, 2025-08-28) | `bdc0f635-989f-45bf-8fd9-a86ad46156e7` |
+
+Also available if the immediately-preceding quarter is wanted for INTC
+rather than the year-ago comparable: `01106e65-b231-4577-832f-b973a2efde3c`
+(10-Q filed 2026-04-23).
+
+**Two questions worth having the diff answer specifically**, since the
+financials raise them and only the narrative can settle them:
+- **INTC**: what does the filing attribute the swing from +$4.06B (Q3 FY2025)
+  to −$11.03B (Q2 FY2026) to? Impairment, restructuring, something else?
+- **IREN**: what explains −$684.0M in a quarter on $137.2M of revenue? A
+  fair-value or impairment note is the likely home for it.
+
+**If it is still dead after a reasonable interval**, 8/8 failures across five
+unrelated tickers and four form types is a server-side defect worth reporting
+to Robinhood rather than engineering around.
+
 ## 1.2 SPCX cannot be explained by anything this team can reach
 
 Three agents produced three partial pictures that do not reconcile:
