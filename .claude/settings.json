@@ -25,7 +25,11 @@
       "mcp__Me__unfollow_watchlist",
       "mcp__Me__create_scan",
       "mcp__Me__update_scan_filters",
-      "mcp__Me__update_scan_config"
+      "mcp__Me__update_scan_config",
+      "mcp__Me__create_alert",
+      "mcp__Me__update_alert",
+      "mcp__Me__delete_alert",
+      "mcp__Me__mark_alerts_read"
     ]
   },
   "hooks": {
